@@ -1,0 +1,231 @@
+{% extends 'layout_connected.html' %}
+
+{% block javascript %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <script>
+        var tplIncoming = "<div class=\"incoming_msg\">\n" +
+            "<div class=\"incoming_msg_img\"><img src=\"https://ptetutorials.com/images/user-profile.png\"\n" +
+            "alt=\"sunil\"></div>\n" +
+            "<div class=\"received_msg\">\n" +
+            "<div class=\"received_withd_msg\">\n" +
+            "<p>#message#</p>\n" +
+            "<span class=\"time_date\">#date#</span></div>\n" +
+            "</div>\n" +
+            "</div>";
+        var tplOutGoing = "<div class=\"outgoing_msg\">\n" +
+            "<div class=\"sent_msg\">\n" +
+            "<p>#message#</p>\n" +
+            "<span class=\"time_date\">#date#</span></div>\n" +
+            "</div>";
+
+        var token = "{{ token }}";
+        var currentType = 0;
+        var myEmail = "{{ myEmail }}";
+
+        $(document).ready(function () {
+            console.log('ready...');
+            var socket = io.connect('{{ baseUrl }}');
+            socket.emit('nouveau_client', { token: token, email: myEmail });
+
+            socket.on('message', function (data) {
+                console.log(data);
+                console.log('message...');
+                console.log(data);
+
+                var rowHtml;
+                if(data['sourceEmail'] == myEmail) {
+                    rowHtml = tplOutGoing;
+                    rowHtml = rowHtml.replace('#message#', data['message'])
+                    rowHtml = rowHtml.replace('#date#', data['date_created'])
+                } else {
+                    rowHtml = tplIncoming;
+                    rowHtml = rowHtml.replace('#message#', data['message'])
+                    rowHtml = rowHtml.replace('#date#', data['date_created'])
+                }
+
+                $('.msg_history').append(rowHtml);
+
+                var wtf    = $('.msg_history');
+                var height = wtf[0].scrollHeight;
+                wtf.scrollTop(height);
+
+            });
+
+            $('#new_message').keypress(function (e) {
+                if (e.which == 13) {
+                    console.log('new_message...');
+
+                    var sendData = { token: '', type: 'room', message: $(this).val() };
+                    $.post( "chat/message", sendData, function( data ) {
+                        console.log('after post...');
+                    });
+                    $(this).val('');
+
+                }
+            });
+
+
+            initMessage();
+
+            scrollToBottom();
+
+
+
+
+        });
+
+
+        function initMessage() {
+
+            var data = { type: 'room' };
+            $.getJSON( "chat/list", data, function( data ) {
+                console.log(data.length);
+                $('.msg_history').html();
+                var listHtml = '';
+                var l = data.length
+                for(var i in data) {
+                    var row = data[l - i - 1];
+                    var rowHtml;
+                    if(row['sourceEmail'] == myEmail) {
+                        rowHtml = tplOutGoing;
+                        rowHtml = rowHtml.replace('#message#', row['message'])
+                        rowHtml = rowHtml.replace('#date#', row['date_created'])
+                    } else {
+                        rowHtml = tplIncoming;
+                        rowHtml = rowHtml.replace('#message#', row['message'])
+                        rowHtml = rowHtml.replace('#date#', row['date_created'])
+                    }
+
+                    listHtml += rowHtml;
+                }
+                $('.msg_history').html(listHtml);
+
+                scrollToBottom();
+
+            });
+        }
+
+        function scrollToBottom() {
+            var elt = $('.msg_history');
+            var height = elt[0].scrollHeight;
+            elt.scrollTop(height);
+        }
+
+    </script>
+
+
+{% endblock %}
+{% block body %}
+
+    <div class="container">
+        <h3 class=" text-center">I@D Chat</h3>
+        <div class="messaging">
+            <div class="inbox_msg">
+                <div class="inbox_people">
+                    <div class="headind_srch">
+                        <div class="recent_heading">
+                            <a id="linkUsers">Connectés</a> | <a id="linkRoom">Room</a>
+                        </div>
+                    </div>
+                    <div class="inbox_chat">
+                        <div class="chat_list active_chat">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat_list">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat_list">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat_list">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat_list">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat_list">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat_list">
+                            <div class="chat_people">
+                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
+                                                           alt="sunil"></div>
+                                <div class="chat_ib">
+                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
+                                    <p>Test, which is a new approach to have all solutions
+                                        astrology under one roof.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mesgs">
+                    <div class="msg_history">
+                        {# ---------- history ----------- #}
+                    </div>
+                    <div class="type_msg">
+                        <div class="input_msg_write">
+                            <input type="text" id="new_message" class="write_msg" placeholder="Type a message"/>
+                            <button class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
+                                                                          aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <p>&nbsp;</p>
+
+        </div>
+    </div>
+
+
+{% endblock %}

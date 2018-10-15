@@ -1,0 +1,4 @@
+/vendor
+/nodejs/node_modules
+/__docs
+/.idea
