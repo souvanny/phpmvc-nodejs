@@ -17,20 +17,24 @@
             "<p>#message#</p>\n" +
             "<span class=\"time_date\">#date#</span></div>\n" +
             "</div>";
-
+        var tplUser = "<div class=\"chat_list\">\n" +
+            "<div class=\"chat_people\">\n" +
+            "<div class=\"chat_img\"><img src=\"https://ptetutorials.com/images/user-profile.png\"\n" +
+            " alt=\"sunil\"></div>\n" +
+            "<div class=\"chat_ib\">\n" +
+            "<h5>#email#</h5>\n" +
+            "</div>\n" +
+            "</div>\n" +
+            "</div>\n";
         var token = "{{ token }}";
         var currentType = 0;
         var myEmail = "{{ myEmail }}";
 
         $(document).ready(function () {
-            console.log('ready...');
             var socket = io.connect('{{ baseUrl }}');
             socket.emit('nouveau_client', { token: token, email: myEmail });
 
             socket.on('message', function (data) {
-                console.log(data);
-                console.log('message...');
-                console.log(data);
 
                 var rowHtml;
                 if(data['sourceEmail'] == myEmail) {
@@ -51,9 +55,20 @@
 
             });
 
+            socket.on('connected_users', function (data) {
+                var listHtml = '';
+                for(var i in data) {
+                    var user = data[i];
+                    var rowHtml = tplUser;
+                    rowHtml = rowHtml.replace('#email#', user['email'])
+                    listHtml += rowHtml;
+                }
+                $('.user_list').html(listHtml);
+            });
+
+
             $('#new_message').keypress(function (e) {
                 if (e.which == 13) {
-                    console.log('new_message...');
 
                     var sendData = { token: '', type: 'room', message: $(this).val() };
                     $.post( "chat/message", sendData, function( data ) {
@@ -65,21 +80,16 @@
             });
 
 
-            initMessage();
-
+            initMessages();
             scrollToBottom();
-
-
-
 
         });
 
 
-        function initMessage() {
+        function initMessages() {
 
             var data = { type: 'room' };
             $.getJSON( "chat/list", data, function( data ) {
-                console.log(data.length);
                 $('.msg_history').html();
                 var listHtml = '';
                 var l = data.length
@@ -128,82 +138,8 @@
                         </div>
                     </div>
                     <div class="inbox_chat">
-                        <div class="chat_list active_chat">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat_list">
-                            <div class="chat_people">
-                                <div class="chat_img"><img src="https://ptetutorials.com/images/user-profile.png"
-                                                           alt="sunil"></div>
-                                <div class="chat_ib">
-                                    <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                                    <p>Test, which is a new approach to have all solutions
-                                        astrology under one roof.</p>
-                                </div>
-                            </div>
+                        <div class="user_list">
+                            {# ---------- users ----------- #}
                         </div>
                     </div>
                 </div>

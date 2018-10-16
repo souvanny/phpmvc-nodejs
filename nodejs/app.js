@@ -14,6 +14,10 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/nodejs/usersList', function(req, res){
+    res.send(JSON.stringify(socketIds));
+});
+
 app.post('/message', verifyToken, (req, res) => {
     console.log('### [/message] >>');
     let o = req.body;
@@ -40,7 +44,25 @@ io.on('connection', function(socket){
     socket.on('nouveau_client', function (params) {
         console.log('>>> [nouveau_client] >>>>');
         socketIds[params.token] = { socketId: socket.id, email: params['email'] };
+        console.log(socketIds);
+        io.emit('connected_users', getConnectedUsers());
+
     });
+
+    // socket.on('disconnect', function () {
+    //     console.log('>>> [disconnect] >>>>');
+    //     console.log(socketIds);
+    //     for (var pseudo in socketIds) {
+    //         if (socketIds[pseudo]['socketId'] == socket.id) {
+    //             delete socketIds[pseudo];
+    //         }
+    //     }
+    //     let connectedUsers = getConnectedUsers();
+    //     console.log(connectedUsers);
+    //     io.emit('disconnect', {connectedUsers: connectedUsers});
+    // });
+
+
 });
 
 http.listen(3000, function(){
@@ -51,4 +73,17 @@ http.listen(3000, function(){
 function verifyToken(req, res, next) {
     next()
 
+}
+
+function getConnectedUsers() {
+    console.log('getConnectedUsers...');
+    console.log(socketIds);
+    let connectedUsers = [];
+    for (let token in socketIds) {
+        var user = socketIds[token];
+        connectedUsers.push({
+            email: user['email']
+        });
+    }
+    return connectedUsers;
 }
